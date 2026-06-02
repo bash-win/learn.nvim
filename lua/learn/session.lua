@@ -21,6 +21,10 @@ function M.is_active()
 end
 
 function M.start()
+  if active then
+    return
+  end
+
   buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, PLACEHOLDER_TEXT)
   vim.bo[buf].bufhidden = "wipe"

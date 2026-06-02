@@ -5,6 +5,10 @@ describe("learn.session", function()
     session.stop()
   end)
 
+  local function counts()
+    return #vim.api.nvim_list_bufs(), #vim.api.nvim_list_tabpages()
+  end
+
   it("loads as a table", function()
     assert.is_table(session)
   end)
@@ -35,10 +39,6 @@ describe("learn.session", function()
   end)
 
   it("stop() tears down the session with no leaked buffers or tabs", function()
-    local function counts()
-      return #vim.api.nvim_list_bufs(), #vim.api.nvim_list_tabpages()
-    end
-
     local bufs_before, tabs_before = counts()
 
     session.start()
@@ -53,5 +53,28 @@ describe("learn.session", function()
     local bufs_after, tabs_after = counts()
     assert.equals(bufs_before, bufs_after)
     assert.equals(tabs_before, tabs_after)
+  end)
+
+  it("start() is a no-op when a session is already active", function()
+    session.start()
+    local play_buf = vim.api.nvim_get_current_buf()
+    local bufs_before, tabs_before = counts()
+
+    session.start()
+
+    assert.is_true(session.is_active())
+    assert.equals(play_buf, vim.api.nvim_get_current_buf())
+
+    local bufs_after, tabs_after = counts()
+    assert.equals(bufs_before, bufs_after)
+    assert.equals(tabs_before, tabs_after)
+  end)
+
+  it("stop() is a safe no-op when no session is active", function()
+    assert.is_false(session.is_active())
+    assert.has_no.errors(function()
+      session.stop()
+    end)
+    assert.is_false(session.is_active())
   end)
 end)
