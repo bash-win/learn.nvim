@@ -8,4 +8,12 @@ function M.setup(opts)
   M.opts = opts or {}
 end
 
+function M.start()
+  require("learn.session").start()
+end
+
+function M.stop()
+  require("learn.session").stop()
+end
+
 return M
