@@ -31,6 +31,8 @@ function M.start()
   vim.bo[buf].filetype = "learn"
   vim.bo[buf].modifiable = false
 
+  vim.keymap.set("n", "q", M.stop, { buffer = buf, nowait = true, desc = "learn.nvim: quit session" })
+
   vim.cmd.tabnew()
   win = vim.api.nvim_get_current_win()
   local empty_buf = vim.api.nvim_get_current_buf()

@@ -77,4 +77,21 @@ describe("learn.session", function()
     end)
     assert.is_false(session.is_active())
   end)
+
+  it("maps q in the play buffer to quit the session", function()
+    session.start()
+    local play_buf = vim.api.nvim_get_current_buf()
+
+    local mapped = false
+    for _, map in ipairs(vim.api.nvim_buf_get_keymap(play_buf, "n")) do
+      if map.lhs == "q" then
+        mapped = true
+      end
+    end
+    assert.is_true(mapped)
+
+    assert.is_true(session.is_active())
+    vim.api.nvim_feedkeys("q", "x", false)
+    assert.is_false(session.is_active())
+  end)
 end)
