@@ -1,0 +1,31 @@
+describe("learn", function()
+  local learn = require("learn")
+
+  it("loads as a table", function()
+    assert.is_table(learn)
+  end)
+
+  it("exposes the public API", function()
+    assert.is_function(learn.setup)
+    assert.is_function(learn.hello)
+  end)
+
+  it("hello() runs without error", function()
+    assert.has_no.errors(function()
+      learn.hello()
+    end)
+  end)
+
+  it("setup() stores the given options", function()
+    learn.setup({ greeting = "hi" })
+    assert.is_table(learn.opts)
+    assert.equals("hi", learn.opts.greeting)
+  end)
+
+  it("setup() tolerates no arguments", function()
+    assert.has_no.errors(function()
+      learn.setup()
+    end)
+    assert.is_table(learn.opts)
+  end)
+end)
