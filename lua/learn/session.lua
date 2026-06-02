@@ -38,6 +38,16 @@ function M.start()
   active = true
 end
 
-function M.stop() end
+--- Stop the active session and tear down its play area.
+function M.stop()
+  if win ~= nil and vim.api.nvim_win_is_valid(win) then
+    -- Closing the play window wipes the buffer (bufhidden=wipe) and, since the
+    -- lesson lives in its own tab, closes that tab too.
+    vim.api.nvim_win_close(win, true)
+  end
+  buf = nil
+  win = nil
+  active = false
+end
 
 return M
