@@ -1,7 +1,9 @@
 TESTS_INIT := tests/minimal_init.lua
 TESTS_DIR  := tests/
 
-.PHONY: test lint format format-check
+.PHONY: ci test lint format format-check
+
+ci: format-check lint test
 
 test:
 	nvim --headless --noplugin -u $(TESTS_INIT) \
