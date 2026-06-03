@@ -34,6 +34,12 @@ local state = {
 
 local function handle_win()
   state.won = true
+  counter.stop()
+  vim.notify(
+    string.format("Reached the target in %d keystrokes!", counter.get()),
+    vim.log.levels.INFO,
+    { title = "learn.nvim" }
+  )
 end
 
 --- Report whether a lesson session is currently running.
@@ -80,6 +86,8 @@ function M.start()
   state.won = false
   state.active = true
 
+  ui.mark_target(buffer, PLACEHOLDER_GOAL.target)
+
   counter.reset()
   ui.render_count(window, 0)
   counter.start(function(keystrokes)
@@ -108,6 +116,9 @@ end
 function M.stop()
   counter.stop()
   vim.api.nvim_clear_autocmds({ group = augroup })
+  if state.buffer ~= nil and vim.api.nvim_buf_is_valid(state.buffer) then
+    ui.clear_target(state.buffer)
+  end
   if state.window ~= nil and vim.api.nvim_win_is_valid(state.window) then
     -- Closing the window wipes the buffer (bufhidden=wipe) and closes its tab.
     vim.api.nvim_win_close(state.window, true)
