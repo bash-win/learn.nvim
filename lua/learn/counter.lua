@@ -3,6 +3,7 @@ local M = {}
 
 local count = 0
 local counting = false
+local ns = vim.api.nvim_create_namespace("learn.counter")
 
 --- Current keystroke count.
 ---@return integer
@@ -16,10 +17,33 @@ function M.is_counting()
   return counting
 end
 
-function M.start() end
+--- Begin counting keystrokes, calling `on_change(count)` after each key.
+---@param on_change fun(count: integer)|nil
+function M.start(on_change)
+  if counting then
+    return
+  end
+  vim.on_key(function()
+    count = count + 1
+    if on_change then
+      on_change(count)
+    end
+  end, ns)
+  counting = true
+end
 
-function M.stop() end
+--- Stop counting keystrokes.
+function M.stop()
+  if not counting then
+    return
+  end
+  vim.on_key(nil, ns)
+  counting = false
+end
 
-function M.reset() end
+--- Reset the keystroke count to zero.
+function M.reset()
+  count = 0
+end
 
 return M
