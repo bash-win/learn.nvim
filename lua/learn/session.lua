@@ -1,6 +1,9 @@
 -- The lifecycle of a single playthrough.
 local M = {}
 
+local counter = require("learn.counter")
+local ui = require("learn.ui")
+
 local active = false
 local buf = nil
 local win = nil
@@ -47,10 +50,19 @@ function M.start()
   end
 
   active = true
+
+  counter.reset()
+  ui.render_count(win, 0)
+  counter.start(function(n)
+    if win ~= nil and vim.api.nvim_win_is_valid(win) then
+      ui.render_count(win, n)
+    end
+  end)
 end
 
 --- Stop the active session and tear down its play area.
 function M.stop()
+  counter.stop()
   if win ~= nil and vim.api.nvim_win_is_valid(win) then
     -- Closing the play window wipes the buffer (bufhidden=wipe) and, since the
     -- lesson lives in its own tab, closes that tab too.
