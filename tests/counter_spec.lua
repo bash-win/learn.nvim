@@ -1,0 +1,20 @@
+describe("learn.counter", function()
+  local counter = require("learn.counter")
+
+  it("loads as a table", function()
+    assert.is_table(counter)
+  end)
+
+  it("exposes the counter API", function()
+    assert.is_function(counter.start)
+    assert.is_function(counter.stop)
+    assert.is_function(counter.reset)
+    assert.is_function(counter.get)
+    assert.is_function(counter.is_counting)
+  end)
+
+  it("starts at zero and not counting", function()
+    assert.equals(0, counter.get())
+    assert.is_false(counter.is_counting())
+  end)
+end)
