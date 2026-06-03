@@ -22,6 +22,7 @@ describe("learn.session", function()
     assert.is_function(session.start)
     assert.is_function(session.stop)
     assert.is_function(session.is_active)
+    assert.is_function(session.is_won)
   end)
 
   it("is not active before a session starts", function()
@@ -115,5 +116,25 @@ describe("learn.session", function()
 
     session.stop()
     assert.is_false(counter.is_counting())
+  end)
+
+  it("fires a win when the cursor reaches the goal target", function()
+    session.start()
+    local play_win = vim.api.nvim_get_current_win()
+    local play_buf = vim.api.nvim_get_current_buf()
+
+    local function cursor_moved()
+      vim.api.nvim_exec_autocmds("CursorMoved", { buffer = play_buf })
+    end
+
+    assert.is_false(session.is_won())
+
+    vim.api.nvim_win_set_cursor(play_win, { 2, 0 })
+    cursor_moved()
+    assert.is_false(session.is_won())
+
+    vim.api.nvim_win_set_cursor(play_win, { 4, 0 })
+    cursor_moved()
+    assert.is_true(session.is_won())
   end)
 end)
