@@ -9,6 +9,11 @@ describe("learn.session", function()
     return #vim.api.nvim_list_bufs(), #vim.api.nvim_list_tabpages()
   end
 
+  local function type_keys(keys)
+    vim.api.nvim_feedkeys(keys, "nt", false)
+    vim.api.nvim_feedkeys("", "x", false)
+  end
+
   it("loads as a table", function()
     assert.is_table(session)
   end)
@@ -93,5 +98,22 @@ describe("learn.session", function()
     assert.is_true(session.is_active())
     vim.api.nvim_feedkeys("q", "x", false)
     assert.is_false(session.is_active())
+  end)
+
+  it("shows and updates the keystroke count while playing", function()
+    local counter = require("learn.counter")
+    session.start()
+    local play_win = vim.api.nvim_get_current_win()
+
+    assert.equals("Keystrokes: 0", vim.wo[play_win].winbar)
+    assert.is_true(counter.is_counting())
+
+    type_keys("ll")
+
+    assert.equals(2, counter.get())
+    assert.equals("Keystrokes: 2", vim.wo[play_win].winbar)
+
+    session.stop()
+    assert.is_false(counter.is_counting())
   end)
 end)
