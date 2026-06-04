@@ -4,6 +4,7 @@ local M = {}
 local counter = require("learn.counter")
 local ui = require("learn.ui")
 local goal = require("learn.goal")
+local score = require("learn.score")
 
 local augroup = vim.api.nvim_create_augroup("learn.session", { clear = true })
 
@@ -17,6 +18,7 @@ local PLACEHOLDER_TEXT = {
 }
 
 local PLACEHOLDER_GOAL = { type = "cursor", target = { line = 4, col = 0 } }
+local PLACEHOLDER_PAR = 3
 
 ---@class learn.SessionState
 ---@field active boolean
@@ -24,22 +26,31 @@ local PLACEHOLDER_GOAL = { type = "cursor", target = { line = 4, col = 0 } }
 ---@field buffer integer|nil
 ---@field window integer|nil
 ---@field goal learn.Goal|nil
+---@field completion { window: integer, buffer: integer }|nil
 local state = {
   active = false,
   won = false,
   buffer = nil,
   window = nil,
   goal = nil,
+  completion = nil,
 }
 
 local function handle_win()
   state.won = true
   counter.stop()
-  vim.notify(
-    string.format("Reached the target in %d keystrokes!", counter.get()),
-    vim.log.levels.INFO,
-    { title = "learn.nvim" }
-  )
+
+  local keystrokes = counter.get()
+  local grade = score.evaluate(keystrokes, PLACEHOLDER_PAR)
+  state.completion = ui.show_completion({
+    keystrokes = keystrokes,
+    par = PLACEHOLDER_PAR,
+    stars = grade.stars,
+    label = grade.label,
+  })
+
+  vim.keymap.set("n", "q", M.stop, { buffer = state.completion.buffer, nowait = true })
+  vim.keymap.set("n", "<CR>", M.stop, { buffer = state.completion.buffer, nowait = true })
 end
 
 --- Report whether a lesson session is currently running.
@@ -116,6 +127,9 @@ end
 function M.stop()
   counter.stop()
   vim.api.nvim_clear_autocmds({ group = augroup })
+  if state.completion ~= nil and vim.api.nvim_win_is_valid(state.completion.window) then
+    vim.api.nvim_win_close(state.completion.window, true)
+  end
   if state.buffer ~= nil and vim.api.nvim_buf_is_valid(state.buffer) then
     ui.clear_target(state.buffer)
   end
@@ -128,6 +142,7 @@ function M.stop()
   state.buffer = nil
   state.window = nil
   state.goal = nil
+  state.completion = nil
 end
 
 return M
