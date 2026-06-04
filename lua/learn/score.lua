@@ -13,17 +13,17 @@ local GOOD_RATIO = 1.5
 ---@param par integer
 ---@return learn.Score
 function M.evaluate(keystrokes, par)
-    if par <= 0 then
-        return { stars = 3, label = "Par or better!" }
-    end
+  if par <= 0 then
+    return { stars = 3, label = "Par or better!" }
+  end
 
-    local ratio = keystrokes / par
-    if ratio <= PERFECT_RATIO then
-        return { stars = 3, label = "Par or better!" }
-    elseif ratio <= GOOD_RATIO then
-        return { stars = 2, label = "Nicely done" }
-    end
-    return { stars = 1, label = "Keep practicing" }
+  local ratio = keystrokes / par
+  if ratio <= PERFECT_RATIO then
+    return { stars = 3, label = "Par or better!" }
+  elseif ratio <= GOOD_RATIO then
+    return { stars = 2, label = "Nicely done" }
+  end
+  return { stars = 1, label = "Keep practicing" }
 end
 
 return M
