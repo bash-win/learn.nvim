@@ -30,4 +30,47 @@ function M.clear_target(buffer)
   vim.api.nvim_buf_clear_namespace(buffer, target_ns, 0, -1)
 end
 
+local TOTAL_STARS = 3
+
+local function completion_lines(summary)
+  local stars = string.rep("★", summary.stars) .. string.rep("☆", TOTAL_STARS - summary.stars)
+  return {
+    "Lesson complete!",
+    "",
+    string.format("Keystrokes: %d   (par: %d)", summary.keystrokes, summary.par),
+    string.format("%s  %s", stars, summary.label),
+    "",
+    "press q to close",
+  }
+end
+
+--- Show a centered completion summary in a floating window.
+---@param summary { keystrokes: integer, par: integer, stars: integer, label: string }
+---@return { window: integer, buffer: integer }
+function M.show_completion(summary)
+  local lines = completion_lines(summary)
+
+  local width = 0
+  for _, line in ipairs(lines) do
+    width = math.max(width, vim.fn.strdisplaywidth(line))
+  end
+
+  local buffer = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
+  vim.bo[buffer].modifiable = false
+  vim.bo[buffer].bufhidden = "wipe"
+
+  local window = vim.api.nvim_open_win(buffer, true, {
+    relative = "editor",
+    width = width + 2,
+    height = #lines,
+    row = math.floor((vim.o.lines - #lines) / 2),
+    col = math.floor((vim.o.columns - width) / 2),
+    style = "minimal",
+    border = "rounded",
+  })
+
+  return { window = window, buffer = buffer }
+end
+
 return M

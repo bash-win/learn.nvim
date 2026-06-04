@@ -146,4 +146,27 @@ describe("learn.session", function()
     local ns = vim.api.nvim_create_namespace("learn.ui.target")
     assert.is_true(#vim.api.nvim_buf_get_extmarks(play_buf, ns, 0, -1, {}) >= 1)
   end)
+
+  it("shows a completion screen on win and closes it on stop", function()
+    local function has_float()
+      for _, window in ipairs(vim.api.nvim_list_wins()) do
+        if vim.api.nvim_win_get_config(window).relative ~= "" then
+          return true
+        end
+      end
+      return false
+    end
+
+    session.start()
+    local play_win = vim.api.nvim_get_current_win()
+    local play_buf = vim.api.nvim_get_current_buf()
+    assert.is_false(has_float())
+
+    vim.api.nvim_win_set_cursor(play_win, { 4, 0 })
+    vim.api.nvim_exec_autocmds("CursorMoved", { buffer = play_buf })
+    assert.is_true(has_float())
+
+    session.stop()
+    assert.is_false(has_float())
+  end)
 end)

@@ -39,4 +39,27 @@ describe("learn.ui", function()
     local ns = vim.api.nvim_create_namespace("learn.ui.target")
     assert.equals(0, #vim.api.nvim_buf_get_extmarks(buffer, ns, 0, -1, {}))
   end)
+
+  it("show_completion opens a centered float with the summary", function()
+    local windows_before = #vim.api.nvim_list_wins()
+
+    local completion = ui.show_completion({
+      keystrokes = 5,
+      par = 3,
+      stars = 2,
+      label = "Nicely done",
+    })
+
+    assert.is_true(vim.api.nvim_win_is_valid(completion.window))
+    assert.equals("editor", vim.api.nvim_win_get_config(completion.window).relative)
+
+    local text = table.concat(vim.api.nvim_buf_get_lines(completion.buffer, 0, -1, false), "\n")
+    assert.is_not_nil(text:find("Keystrokes: 5", 1, true))
+    assert.is_not_nil(text:find("par: 3", 1, true))
+    assert.is_not_nil(text:find("Nicely done", 1, true))
+    assert.is_not_nil(text:find("★★☆", 1, true))
+
+    vim.api.nvim_win_close(completion.window, true)
+    assert.equals(windows_before, #vim.api.nvim_list_wins())
+  end)
 end)
