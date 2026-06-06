@@ -26,4 +26,24 @@ describe("learn.loader", function()
     assert.equals(1, #track.lessons)
     assert.equals("01-only", track.lessons[1].id)
   end)
+
+  it("loads the built-in basics track", function()
+    local basics
+    for _, track in ipairs(loader.tracks()) do
+      if track.id == "basics" then
+        basics = track
+      end
+    end
+
+    assert.is_not_nil(basics)
+    assert.equals("The Basics", basics.title)
+    assert.is_true(#basics.lessons >= 1)
+  end)
+
+  it("default_lesson returns a valid lesson from a built-in track", function()
+    local default = loader.default_lesson()
+    assert.is_not_nil(default)
+    assert.is_true((require("learn.lesson").validate(default)))
+    assert.equals("basics", default.track)
+  end)
 end)

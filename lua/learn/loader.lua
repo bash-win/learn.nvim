@@ -69,4 +69,30 @@ function M.load_track(dir)
   return track
 end
 
+--- Load every built-in track shipped with the plugin.
+---@return learn.Track[]
+function M.tracks()
+  local tracks = {}
+  local roots = vim.api.nvim_get_runtime_file("tracks", false)
+  if #roots > 0 then
+    for _, name in ipairs(vim.fn.readdir(roots[1])) do
+      local dir = roots[1] .. "/" .. name
+      if vim.fn.isdirectory(dir) == 1 then
+        table.insert(tracks, M.load_track(dir))
+      end
+    end
+  end
+  return tracks
+end
+
+--- The first lesson of the first built-in track, used as a default.
+---@return learn.Lesson|nil
+function M.default_lesson()
+  local tracks = M.tracks()
+  if #tracks > 0 and #tracks[1].lessons > 0 then
+    return tracks[1].lessons[1]
+  end
+  return nil
+end
+
 return M
