@@ -62,4 +62,34 @@ describe("learn.ui", function()
     vim.api.nvim_win_close(completion.window, true)
     assert.equals(windows_before, #vim.api.nvim_list_wins())
   end)
+
+  it("offers next/quit when a next lesson exists", function()
+    local completion = ui.show_completion({
+      keystrokes = 3,
+      par = 3,
+      stars = 3,
+      label = "Par or better!",
+      has_next = true,
+    })
+
+    local text = table.concat(vim.api.nvim_buf_get_lines(completion.buffer, 0, -1, false), "\n")
+    assert.is_not_nil(text:find("n: next lesson", 1, true))
+
+    vim.api.nvim_win_close(completion.window, true)
+  end)
+
+  it("shows track complete on the last lesson", function()
+    local completion = ui.show_completion({
+      keystrokes = 3,
+      par = 3,
+      stars = 3,
+      label = "Par or better!",
+      has_next = false,
+    })
+
+    local text = table.concat(vim.api.nvim_buf_get_lines(completion.buffer, 0, -1, false), "\n")
+    assert.is_not_nil(text:find("Track complete!", 1, true))
+
+    vim.api.nvim_win_close(completion.window, true)
+  end)
 end)

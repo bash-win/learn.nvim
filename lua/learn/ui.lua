@@ -34,18 +34,24 @@ local TOTAL_STARS = 3
 
 local function completion_lines(summary)
   local stars = string.rep("★", summary.stars) .. string.rep("☆", TOTAL_STARS - summary.stars)
-  return {
+  local lines = {
     "Lesson complete!",
     "",
     string.format("Keystrokes: %d   (par: %d)", summary.keystrokes, summary.par),
     string.format("%s  %s", stars, summary.label),
     "",
-    "press q to close",
   }
+  if summary.has_next then
+    table.insert(lines, "n: next lesson    q: quit")
+  else
+    table.insert(lines, "Track complete!")
+    table.insert(lines, "q: quit")
+  end
+  return lines
 end
 
 --- Show a centered completion summary in a floating window.
----@param summary { keystrokes: integer, par: integer, stars: integer, label: string }
+---@param summary { keystrokes: integer, par: integer, stars: integer, label: string, has_next: boolean }
 ---@return { window: integer, buffer: integer }
 function M.show_completion(summary)
   local lines = completion_lines(summary)

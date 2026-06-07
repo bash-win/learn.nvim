@@ -16,34 +16,46 @@ local DEFAULT_PAR = 20
 ---@field won boolean
 ---@field buffer integer|nil
 ---@field window integer|nil
----@field goal learn.Goal|nil
----@field par integer|nil
+---@field lesson learn.Lesson|nil
 ---@field completion { window: integer, buffer: integer }|nil
 local state = {
   active = false,
   won = false,
   buffer = nil,
   window = nil,
-  goal = nil,
-  par = nil,
+  lesson = nil,
   completion = nil,
 }
+
+local function go_next()
+  local next_lesson = loader.next_lesson(state.lesson)
+  M.stop()
+  if next_lesson ~= nil then
+    M.start(next_lesson)
+  end
+end
 
 local function handle_win()
   state.won = true
   counter.stop()
 
   local keystrokes = counter.get()
-  local grade = score.evaluate(keystrokes, state.par)
+  local par = state.lesson.par or DEFAULT_PAR
+  local grade = score.evaluate(keystrokes, par)
+  local has_next = loader.next_lesson(state.lesson) ~= nil
+
   state.completion = ui.show_completion({
     keystrokes = keystrokes,
-    par = state.par,
+    par = par,
     stars = grade.stars,
     label = grade.label,
+    has_next = has_next,
   })
 
   vim.keymap.set("n", "q", M.stop, { buffer = state.completion.buffer, nowait = true })
-  vim.keymap.set("n", "<CR>", M.stop, { buffer = state.completion.buffer, nowait = true })
+  if has_next then
+    vim.keymap.set("n", "n", go_next, { buffer = state.completion.buffer, nowait = true })
+  end
 end
 
 --- Report whether a lesson session is currently running.
@@ -94,8 +106,7 @@ function M.start(lesson)
 
   state.buffer = buffer
   state.window = window
-  state.goal = lesson.goal
-  state.par = lesson.par or DEFAULT_PAR
+  state.lesson = lesson
   state.won = false
   state.active = true
 
@@ -113,12 +124,12 @@ function M.start(lesson)
     group = augroup,
     buffer = buffer,
     callback = function()
-      if state.won or state.goal == nil then
+      if state.won or state.lesson == nil then
         return
       end
       local cursor = vim.api.nvim_win_get_cursor(window)
       local position = { line = cursor[1], col = cursor[2] }
-      if goal.is_reached(state.goal, position) then
+      if goal.is_reached(state.lesson.goal, position) then
         handle_win()
       end
     end,
@@ -143,8 +154,7 @@ function M.stop()
   state.won = false
   state.buffer = nil
   state.window = nil
-  state.goal = nil
-  state.par = nil
+  state.lesson = nil
   state.completion = nil
 end
 
