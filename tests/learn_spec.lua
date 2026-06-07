@@ -20,6 +20,23 @@ describe("learn", function()
     assert.is_false(session.is_active())
   end)
 
+  it("setup() registers user track folders with the loader", function()
+    local here = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h")
+    local loader = require("learn.loader")
+
+    learn.setup({ tracks = { here .. "/fixtures/sample" } })
+
+    local found = false
+    for _, track in ipairs(loader.tracks()) do
+      if track.id == "sample" then
+        found = true
+      end
+    end
+    assert.is_true(found)
+
+    loader.set_user_tracks({})
+  end)
+
   it("hello() runs without error", function()
     assert.has_no.errors(function()
       learn.hello()

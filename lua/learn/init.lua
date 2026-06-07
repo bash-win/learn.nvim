@@ -6,10 +6,12 @@ end
 
 function M.setup(opts)
   M.opts = opts or {}
+  require("learn.loader").set_user_tracks(M.opts.tracks or {})
 end
 
-function M.start()
-  require("learn.session").start()
+---@param lesson learn.Lesson|nil
+function M.start(lesson)
+  require("learn.session").start(lesson)
 end
 
 function M.stop()

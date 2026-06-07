@@ -169,4 +169,17 @@ describe("learn.session", function()
     session.stop()
     assert.is_false(has_float())
   end)
+
+  it("plays a provided lesson instead of the default", function()
+    session.start({
+      title = "Custom",
+      text = { "custom line one", "custom line two" },
+      goal = { type = "cursor", target = { line = 2, col = 0 } },
+      par = 1,
+    })
+
+    local lines = vim.api.nvim_buf_get_lines(vim.api.nvim_get_current_buf(), 0, -1, false)
+    assert.equals("custom line one", lines[1])
+    assert.equals(2, #lines)
+  end)
 end)

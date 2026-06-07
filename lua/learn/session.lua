@@ -5,20 +5,11 @@ local counter = require("learn.counter")
 local ui = require("learn.ui")
 local goal = require("learn.goal")
 local score = require("learn.score")
+local loader = require("learn.loader")
 
 local augroup = vim.api.nvim_create_augroup("learn.session", { clear = true })
 
-local PLACEHOLDER_TEXT = {
-  "Welcome to learn.nvim!",
-  "",
-  "This is a practice buffer. Move around with h, j, k, and l.",
-  "Soon, lessons will set you a goal and count your keystrokes.",
-  "",
-  "Press q to quit.",
-}
-
-local PLACEHOLDER_GOAL = { type = "cursor", target = { line = 4, col = 0 } }
-local PLACEHOLDER_PAR = 3
+local DEFAULT_PAR = 20
 
 ---@class learn.SessionState
 ---@field active boolean
@@ -26,6 +17,7 @@ local PLACEHOLDER_PAR = 3
 ---@field buffer integer|nil
 ---@field window integer|nil
 ---@field goal learn.Goal|nil
+---@field par integer|nil
 ---@field completion { window: integer, buffer: integer }|nil
 local state = {
   active = false,
@@ -33,6 +25,7 @@ local state = {
   buffer = nil,
   window = nil,
   goal = nil,
+  par = nil,
   completion = nil,
 }
 
@@ -41,10 +34,10 @@ local function handle_win()
   counter.stop()
 
   local keystrokes = counter.get()
-  local grade = score.evaluate(keystrokes, PLACEHOLDER_PAR)
+  local grade = score.evaluate(keystrokes, state.par)
   state.completion = ui.show_completion({
     keystrokes = keystrokes,
-    par = PLACEHOLDER_PAR,
+    par = state.par,
     stars = grade.stars,
     label = grade.label,
   })
@@ -65,13 +58,21 @@ function M.is_won()
   return state.won
 end
 
-function M.start()
+--- Start a session for the given lesson, defaulting to the first built-in one.
+---@param lesson learn.Lesson|nil
+function M.start(lesson)
   if state.active then
     return
   end
 
+  lesson = lesson or loader.default_lesson()
+  if lesson == nil then
+    vim.notify("learn.nvim: no lessons available", vim.log.levels.ERROR)
+    return
+  end
+
   local buffer = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_lines(buffer, 0, -1, false, PLACEHOLDER_TEXT)
+  vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lesson.text)
   vim.bo[buffer].bufhidden = "wipe"
   vim.bo[buffer].filetype = "learn"
   vim.bo[buffer].modifiable = false
@@ -93,11 +94,12 @@ function M.start()
 
   state.buffer = buffer
   state.window = window
-  state.goal = PLACEHOLDER_GOAL
+  state.goal = lesson.goal
+  state.par = lesson.par or DEFAULT_PAR
   state.won = false
   state.active = true
 
-  ui.mark_target(buffer, PLACEHOLDER_GOAL.target)
+  ui.mark_target(buffer, lesson.goal.target)
 
   counter.reset()
   ui.render_count(window, 0)
@@ -142,6 +144,7 @@ function M.stop()
   state.buffer = nil
   state.window = nil
   state.goal = nil
+  state.par = nil
   state.completion = nil
 end
 
