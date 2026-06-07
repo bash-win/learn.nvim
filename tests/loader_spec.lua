@@ -64,4 +64,15 @@ describe("learn.loader", function()
     assert.is_not_nil(found)
     assert.equals("Sample Track", found.title)
   end)
+
+  it("next_lesson returns the following lesson, nil on the last", function()
+    loader.set_user_tracks({ fixtures .. "/sample" })
+    local track = loader.load_track(fixtures .. "/sample")
+
+    local after_first = loader.next_lesson(track.lessons[1])
+    assert.is_not_nil(after_first)
+    assert.equals("02-second", after_first.id)
+
+    assert.is_nil(loader.next_lesson(track.lessons[2]))
+  end)
 end)

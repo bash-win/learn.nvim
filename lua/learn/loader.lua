@@ -114,4 +114,20 @@ function M.default_lesson()
   return nil
 end
 
+--- The lesson after the given one in its track, or nil if it is the last.
+---@param lesson learn.Lesson
+---@return learn.Lesson|nil
+function M.next_lesson(lesson)
+  for _, track in ipairs(M.tracks()) do
+    if track.id == lesson.track then
+      for index, current in ipairs(track.lessons) do
+        if current.id == lesson.id then
+          return track.lessons[index + 1]
+        end
+      end
+    end
+  end
+  return nil
+end
+
 return M
