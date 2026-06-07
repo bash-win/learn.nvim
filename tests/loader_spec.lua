@@ -4,6 +4,10 @@ describe("learn.loader", function()
   local here = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h")
   local fixtures = here .. "/fixtures"
 
+  after_each(function()
+    loader.set_user_tracks({})
+  end)
+
   it("loads a track folder into ordered lessons with metadata", function()
     local track = loader.load_track(fixtures .. "/sample")
 
@@ -45,5 +49,19 @@ describe("learn.loader", function()
     assert.is_not_nil(default)
     assert.is_true((require("learn.lesson").validate(default)))
     assert.equals("basics", default.track)
+  end)
+
+  it("includes user-configured track folders alongside built-ins", function()
+    loader.set_user_tracks({ fixtures .. "/sample" })
+
+    local found
+    for _, track in ipairs(loader.tracks()) do
+      if track.id == "sample" then
+        found = track
+      end
+    end
+
+    assert.is_not_nil(found)
+    assert.equals("Sample Track", found.title)
   end)
 end)

@@ -6,6 +6,7 @@ end
 
 function M.setup(opts)
   M.opts = opts or {}
+  require("learn.loader").set_user_tracks(M.opts.tracks or {})
 end
 
 ---@param lesson learn.Lesson|nil

@@ -3,6 +3,8 @@ local M = {}
 
 local lesson = require("learn.lesson")
 
+local user_track_dirs = {}
+
 ---@class learn.Track
 ---@field id string
 ---@field title string
@@ -69,10 +71,17 @@ function M.load_track(dir)
   return track
 end
 
---- Load every built-in track shipped with the plugin.
+--- Register user-provided track folders. Each folder is loaded as one track.
+---@param dirs string[]
+function M.set_user_tracks(dirs)
+  user_track_dirs = dirs or {}
+end
+
+--- Load every track: the built-in tracks plus any user-configured folders.
 ---@return learn.Track[]
 function M.tracks()
   local tracks = {}
+
   local roots = vim.api.nvim_get_runtime_file("tracks", false)
   if #roots > 0 then
     for _, name in ipairs(vim.fn.readdir(roots[1])) do
@@ -82,6 +91,16 @@ function M.tracks()
       end
     end
   end
+
+  for _, dir in ipairs(user_track_dirs) do
+    local expanded = vim.fn.expand(dir)
+    if vim.fn.isdirectory(expanded) == 1 then
+      table.insert(tracks, M.load_track(expanded))
+    else
+      vim.notify("learn.nvim: track folder not found: " .. dir, vim.log.levels.WARN)
+    end
+  end
+
   return tracks
 end
 
