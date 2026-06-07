@@ -8,8 +8,9 @@ function M.setup(opts)
   M.opts = opts or {}
 end
 
-function M.start()
-  require("learn.session").start()
+---@param lesson learn.Lesson|nil
+function M.start(lesson)
+  require("learn.session").start(lesson)
 end
 
 function M.stop()
