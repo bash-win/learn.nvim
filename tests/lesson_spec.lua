@@ -44,11 +44,25 @@ describe("learn.lesson", function()
     assert.is_false((lesson.validate(candidate)))
   end)
 
-  it("rejects a malformed or unsupported goal", function()
+  it("accepts a content goal with an expected end-state", function()
     local candidate = valid()
+    candidate.goal = { type = "content", expected = { "fixed", "lines" } }
+    assert.is_true((lesson.validate(candidate)))
+  end)
+
+  it("rejects a malformed goal", function()
+    local candidate = valid()
+
     candidate.goal = { type = "cursor" }
     assert.is_false((lesson.validate(candidate)))
-    candidate.goal = { type = "content", target = { line = 1, col = 0 } }
+
+    candidate.goal = { type = "content" }
+    assert.is_false((lesson.validate(candidate)))
+
+    candidate.goal = { type = "content", expected = {} }
+    assert.is_false((lesson.validate(candidate)))
+
+    candidate.goal = { type = "bogus" }
     assert.is_false((lesson.validate(candidate)))
   end)
 
