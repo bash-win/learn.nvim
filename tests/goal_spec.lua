@@ -28,7 +28,9 @@ describe("learn.goal", function()
 
   it("content goal is not reached when the buffer differs", function()
     local g = { type = "content", expected = { "fixed", "lines" } }
-    assert.is_false(goal.is_reached(g, { cursor = { line = 1, col = 0 }, lines = { "wrong", "lines" } }))
+    assert.is_false(
+      goal.is_reached(g, { cursor = { line = 1, col = 0 }, lines = { "wrong", "lines" } })
+    )
     assert.is_false(goal.is_reached(g, { cursor = { line = 1, col = 0 }, lines = { "fixed" } }))
   end)
 
