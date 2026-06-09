@@ -39,12 +39,18 @@ function M.validate(candidate)
   if type(candidate.goal) ~= "table" then
     return false, "lesson.goal must be a table"
   end
-  if candidate.goal.type ~= "cursor" then
-    return false, "lesson.goal.type must be 'cursor'"
-  end
-  local target = candidate.goal.target
-  if type(target) ~= "table" or type(target.line) ~= "number" or type(target.col) ~= "number" then
-    return false, "lesson.goal.target must have numeric line and col"
+  local goal = candidate.goal
+  if goal.type == "cursor" then
+    local target = goal.target
+    if type(target) ~= "table" or type(target.line) ~= "number" or type(target.col) ~= "number" then
+      return false, "lesson.goal.target must have numeric line and col"
+    end
+  elseif goal.type == "content" then
+    if not is_string_list(goal.expected) or #goal.expected == 0 then
+      return false, "lesson.goal.expected must be a non-empty list of strings"
+    end
+  else
+    return false, "lesson.goal.type must be 'cursor' or 'content'"
   end
   if candidate.par ~= nil and (type(candidate.par) ~= "number" or candidate.par <= 0) then
     return false, "lesson.par must be a positive number when set"

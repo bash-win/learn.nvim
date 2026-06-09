@@ -17,6 +17,18 @@ describe("learn.session", function()
     vim.api.nvim_feedkeys("", "x", false)
   end
 
+  -- The completion screen is shown via vim.schedule; flush the loop before asserting on it.
+  local function wait_for_float()
+    vim.wait(500, function()
+      for _, window in ipairs(vim.api.nvim_list_wins()) do
+        if vim.api.nvim_win_get_config(window).relative ~= "" then
+          return true
+        end
+      end
+      return false
+    end)
+  end
+
   it("loads as a table", function()
     assert.is_table(session)
   end)
@@ -167,6 +179,7 @@ describe("learn.session", function()
 
     vim.api.nvim_win_set_cursor(play_win, { 4, 0 })
     vim.api.nvim_exec_autocmds("CursorMoved", { buffer = play_buf })
+    wait_for_float()
     assert.is_true(has_float())
 
     session.stop()
@@ -197,6 +210,7 @@ describe("learn.session", function()
     vim.api.nvim_win_set_cursor(play_win, { 2, 0 })
     vim.api.nvim_exec_autocmds("CursorMoved", { buffer = play_buf })
     assert.is_true(session.is_won())
+    wait_for_float()
 
     local advance
     for _, map in ipairs(vim.api.nvim_buf_get_keymap(vim.api.nvim_get_current_buf(), "n")) do
@@ -222,6 +236,7 @@ describe("learn.session", function()
     vim.api.nvim_win_set_cursor(play_win, { 1, 3 })
     vim.api.nvim_exec_autocmds("CursorMoved", { buffer = play_buf })
     assert.is_true(session.is_won())
+    wait_for_float()
 
     local has_next_key = false
     for _, map in ipairs(vim.api.nvim_buf_get_keymap(vim.api.nvim_get_current_buf(), "n")) do
@@ -230,5 +245,37 @@ describe("learn.session", function()
       end
     end
     assert.is_false(has_next_key)
+  end)
+
+  it("wins a content lesson when the buffer matches expected (edit)", function()
+    session.start({
+      title = "Fix it",
+      text = { "helo world" },
+      goal = { type = "content", expected = { "hello world" } },
+      par = 2,
+    })
+    local play_buf = vim.api.nvim_get_current_buf()
+
+    assert.is_true(vim.bo[play_buf].modifiable)
+    assert.is_false(session.is_won())
+
+    vim.api.nvim_buf_set_lines(play_buf, 0, -1, false, { "hello world" })
+    vim.api.nvim_exec_autocmds("TextChanged", { buffer = play_buf })
+
+    assert.is_true(session.is_won())
+  end)
+
+  it("wins a content lesson when extra lines are deleted (delete)", function()
+    session.start({
+      title = "Delete the block",
+      text = { "keep", "delete me", "delete me too" },
+      goal = { type = "content", expected = { "keep" } },
+    })
+    local play_buf = vim.api.nvim_get_current_buf()
+
+    vim.api.nvim_buf_set_lines(play_buf, 0, -1, false, { "keep" })
+    vim.api.nvim_exec_autocmds("TextChanged", { buffer = play_buf })
+
+    assert.is_true(session.is_won())
   end)
 end)
