@@ -36,8 +36,9 @@ local function go_next()
 end
 
 local function handle_win()
-  state.won = true
-  counter.stop()
+  if not state.won or state.lesson == nil or state.completion ~= nil then
+    return
+  end
   vim.cmd("stopinsert")
 
   local keystrokes = counter.get()
@@ -138,7 +139,9 @@ function M.start(lesson)
         lines = vim.api.nvim_buf_get_lines(buffer, 0, -1, false),
       }
       if goal.is_reached(state.lesson.goal, context) then
-        handle_win()
+        state.won = true
+        counter.stop()
+        vim.schedule(handle_win)
       end
     end,
   })
