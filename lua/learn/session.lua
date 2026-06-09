@@ -38,6 +38,7 @@ end
 local function handle_win()
   state.won = true
   counter.stop()
+  vim.cmd("stopinsert")
 
   local keystrokes = counter.get()
   local par = state.lesson.par or DEFAULT_PAR
@@ -87,7 +88,7 @@ function M.start(lesson)
   vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lesson.text)
   vim.bo[buffer].bufhidden = "wipe"
   vim.bo[buffer].filetype = "learn"
-  vim.bo[buffer].modifiable = false
+  vim.bo[buffer].modifiable = lesson.goal.type == "content"
 
   vim.keymap.set(
     "n",
@@ -110,7 +111,9 @@ function M.start(lesson)
   state.won = false
   state.active = true
 
-  ui.mark_target(buffer, lesson.goal.target)
+  if lesson.goal.type == "cursor" then
+    ui.mark_target(buffer, lesson.goal.target)
+  end
 
   counter.reset()
   ui.render_count(window, 0)
@@ -120,7 +123,9 @@ function M.start(lesson)
     end
   end)
 
-  vim.api.nvim_create_autocmd("CursorMoved", {
+  local events = lesson.goal.type == "content" and { "TextChanged", "TextChangedI" }
+    or { "CursorMoved" }
+  vim.api.nvim_create_autocmd(events, {
     group = augroup,
     buffer = buffer,
     callback = function()

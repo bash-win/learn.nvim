@@ -43,6 +43,14 @@ describe("learn.loader", function()
     assert.equals("The Basics", basics.title)
     assert.is_true(#basics.lessons >= 2)
     assert.equals("01-intro", basics.lessons[1].id)
+
+    local has_content_lesson = false
+    for _, entry in ipairs(basics.lessons) do
+      if entry.goal.type == "content" then
+        has_content_lesson = true
+      end
+    end
+    assert.is_true(has_content_lesson)
   end)
 
   it("default_lesson returns a valid lesson from a built-in track", function()
