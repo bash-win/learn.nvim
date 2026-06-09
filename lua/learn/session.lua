@@ -128,8 +128,11 @@ function M.start(lesson)
         return
       end
       local cursor = vim.api.nvim_win_get_cursor(window)
-      local position = { line = cursor[1], col = cursor[2] }
-      if goal.is_reached(state.lesson.goal, position) then
+      local context = {
+        cursor = { line = cursor[1], col = cursor[2] },
+        lines = vim.api.nvim_buf_get_lines(buffer, 0, -1, false),
+      }
+      if goal.is_reached(state.lesson.goal, context) then
         handle_win()
       end
     end,
