@@ -41,7 +41,8 @@ describe("learn.loader", function()
 
     assert.is_not_nil(basics)
     assert.equals("The Basics", basics.title)
-    assert.is_true(#basics.lessons >= 1)
+    assert.is_true(#basics.lessons >= 2)
+    assert.equals("01-intro", basics.lessons[1].id)
   end)
 
   it("default_lesson returns a valid lesson from a built-in track", function()
