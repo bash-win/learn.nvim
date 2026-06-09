@@ -1,8 +1,11 @@
 describe("learn.session", function()
   local session = require("learn.session")
+  local loader = require("learn.loader")
+  local fixtures = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h") .. "/fixtures"
 
   after_each(function()
     session.stop()
+    loader.set_user_tracks({})
   end)
 
   local function counts()
@@ -181,5 +184,51 @@ describe("learn.session", function()
     local lines = vim.api.nvim_buf_get_lines(vim.api.nvim_get_current_buf(), 0, -1, false)
     assert.equals("custom line one", lines[1])
     assert.equals(2, #lines)
+  end)
+
+  it("advances to the next lesson with n on the end screen", function()
+    loader.set_user_tracks({ fixtures .. "/sample" })
+    local track = loader.load_track(fixtures .. "/sample")
+
+    session.start(track.lessons[1])
+    local play_win = vim.api.nvim_get_current_win()
+    local play_buf = vim.api.nvim_get_current_buf()
+
+    vim.api.nvim_win_set_cursor(play_win, { 2, 0 })
+    vim.api.nvim_exec_autocmds("CursorMoved", { buffer = play_buf })
+    assert.is_true(session.is_won())
+
+    local advance
+    for _, map in ipairs(vim.api.nvim_buf_get_keymap(vim.api.nvim_get_current_buf(), "n")) do
+      if map.lhs == "n" then
+        advance = map.callback
+      end
+    end
+    assert.is_function(advance)
+    advance()
+
+    local lines = vim.api.nvim_buf_get_lines(vim.api.nvim_get_current_buf(), 0, -1, false)
+    assert.equals("gamma", lines[1])
+  end)
+
+  it("offers only quit on the last lesson of a track", function()
+    loader.set_user_tracks({ fixtures .. "/sample" })
+    local track = loader.load_track(fixtures .. "/sample")
+
+    session.start(track.lessons[2])
+    local play_win = vim.api.nvim_get_current_win()
+    local play_buf = vim.api.nvim_get_current_buf()
+
+    vim.api.nvim_win_set_cursor(play_win, { 1, 3 })
+    vim.api.nvim_exec_autocmds("CursorMoved", { buffer = play_buf })
+    assert.is_true(session.is_won())
+
+    local has_next_key = false
+    for _, map in ipairs(vim.api.nvim_buf_get_keymap(vim.api.nvim_get_current_buf(), "n")) do
+      if map.lhs == "n" then
+        has_next_key = true
+      end
+    end
+    assert.is_false(has_next_key)
   end)
 end)

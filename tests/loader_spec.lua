@@ -41,7 +41,8 @@ describe("learn.loader", function()
 
     assert.is_not_nil(basics)
     assert.equals("The Basics", basics.title)
-    assert.is_true(#basics.lessons >= 1)
+    assert.is_true(#basics.lessons >= 2)
+    assert.equals("01-intro", basics.lessons[1].id)
   end)
 
   it("default_lesson returns a valid lesson from a built-in track", function()
@@ -63,5 +64,16 @@ describe("learn.loader", function()
 
     assert.is_not_nil(found)
     assert.equals("Sample Track", found.title)
+  end)
+
+  it("next_lesson returns the following lesson, nil on the last", function()
+    loader.set_user_tracks({ fixtures .. "/sample" })
+    local track = loader.load_track(fixtures .. "/sample")
+
+    local after_first = loader.next_lesson(track.lessons[1])
+    assert.is_not_nil(after_first)
+    assert.equals("02-second", after_first.id)
+
+    assert.is_nil(loader.next_lesson(track.lessons[2]))
   end)
 end)
