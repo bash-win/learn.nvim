@@ -84,4 +84,15 @@ describe("learn.loader", function()
 
     assert.is_nil(loader.next_lesson(track.lessons[2]))
   end)
+
+  it("find_lesson resolves a lesson by track and id", function()
+    loader.set_user_tracks({ fixtures .. "/sample" })
+
+    local found = loader.find_lesson("sample", "02-second")
+    assert.is_not_nil(found)
+    assert.equals("Second", found.title)
+
+    assert.is_nil(loader.find_lesson("sample", "missing"))
+    assert.is_nil(loader.find_lesson("missing", "02-second"))
+  end)
 end)

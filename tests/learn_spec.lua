@@ -10,6 +10,7 @@ describe("learn", function()
     assert.is_function(learn.hello)
     assert.is_function(learn.start)
     assert.is_function(learn.stop)
+    assert.is_function(learn.menu)
   end)
 
   it("start()/stop() delegate to the session module", function()
