@@ -18,4 +18,8 @@ function M.stop()
   require("learn.session").stop()
 end
 
+function M.menu()
+  require("learn.menu").open()
+end
+
 return M

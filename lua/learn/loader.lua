@@ -130,4 +130,21 @@ function M.next_lesson(current_lesson)
   return nil
 end
 
+--- Find a lesson by its track id and lesson id, or nil.
+---@param track_id string
+---@param lesson_id string
+---@return learn.Lesson|nil
+function M.find_lesson(track_id, lesson_id)
+  for _, track in ipairs(M.tracks()) do
+    if track.id == track_id then
+      for _, candidate in ipairs(track.lessons) do
+        if candidate.id == lesson_id then
+          return candidate
+        end
+      end
+    end
+  end
+  return nil
+end
+
 return M
