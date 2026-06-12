@@ -12,6 +12,18 @@ function M.render_count(window, count)
   vim.wo[window].winbar = string.format("Keystrokes: %d", count)
 end
 
+--- Show a lesson hint without stealing focus.
+---@param index integer
+---@param total integer
+---@param text string
+function M.show_hint(index, total, text)
+  vim.notify(
+    string.format("Hint %d/%d: %s", index, total, text),
+    vim.log.levels.INFO,
+    { title = "learn.nvim" }
+  )
+end
+
 --- Highlight the goal target cell in the buffer.
 ---@param buffer integer
 ---@param position learn.Pos

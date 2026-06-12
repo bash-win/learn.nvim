@@ -46,4 +46,11 @@ function M.reset()
   count = 0
 end
 
+--- Subtract one from the count, e.g. to refund a non-lesson keypress.
+function M.discount()
+  if count > 0 then
+    count = count - 1
+  end
+end
+
 return M

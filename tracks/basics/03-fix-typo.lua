@@ -14,4 +14,8 @@ return {
     },
   },
   par = 8,
+  hints = {
+    "Move onto the misspelled word, then fix it (e.g. cw to change it).",
+    'It is missing an l — it should read "hello, world".',
+  },
 }

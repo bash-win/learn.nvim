@@ -16,4 +16,8 @@ return {
     },
   },
   par = 6,
+  hints = {
+    "Put the cursor on a TODO line and press dd to delete it.",
+    "There are two TODO lines to remove.",
+  },
 }

@@ -68,4 +68,18 @@ describe("learn.counter", function()
     assert.equals(1, seen[1])
     assert.equals(2, seen[2])
   end)
+
+  it("discount() refunds one keystroke", function()
+    counter.start()
+    type_keys("lll")
+    assert.equals(3, counter.get())
+
+    counter.discount()
+    assert.equals(2, counter.get())
+  end)
+
+  it("discount() never goes below zero", function()
+    counter.discount()
+    assert.equals(0, counter.get())
+  end)
 end)
