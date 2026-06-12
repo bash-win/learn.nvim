@@ -11,12 +11,15 @@ local augroup = vim.api.nvim_create_augroup("learn.session", { clear = true })
 
 local DEFAULT_PAR = 20
 
+local HINT_KEY = "<F1>"
+
 ---@class learn.SessionState
 ---@field active boolean
 ---@field won boolean
 ---@field buffer integer|nil
 ---@field window integer|nil
 ---@field lesson learn.Lesson|nil
+---@field hint_index integer
 ---@field completion { window: integer, buffer: integer }|nil
 local state = {
   active = false,
@@ -24,6 +27,7 @@ local state = {
   buffer = nil,
   window = nil,
   lesson = nil,
+  hint_index = 0,
   completion = nil,
 }
 
@@ -58,6 +62,25 @@ local function handle_win()
   if has_next then
     vim.keymap.set("n", "n", go_next, { buffer = state.completion.buffer, nowait = true })
   end
+end
+
+local function show_hint()
+  counter.discount()
+  if state.window ~= nil and vim.api.nvim_win_is_valid(state.window) then
+    ui.render_count(state.window, counter.get())
+  end
+
+  local hints = state.lesson and state.lesson.hints
+  if not hints or #hints == 0 then
+    vim.notify("learn.nvim: no hints for this lesson", vim.log.levels.INFO)
+    return
+  end
+  if state.hint_index >= #hints then
+    vim.notify("learn.nvim: no more hints", vim.log.levels.INFO)
+    return
+  end
+  state.hint_index = state.hint_index + 1
+  ui.show_hint(state.hint_index, #hints, hints[state.hint_index])
 end
 
 --- Report whether a lesson session is currently running.
@@ -97,6 +120,12 @@ function M.start(lesson)
     M.stop,
     { buffer = buffer, nowait = true, desc = "learn.nvim: quit session" }
   )
+  vim.keymap.set(
+    "n",
+    HINT_KEY,
+    show_hint,
+    { buffer = buffer, nowait = true, desc = "learn.nvim: show a hint" }
+  )
 
   vim.cmd.tabnew()
   local window = vim.api.nvim_get_current_win()
@@ -110,6 +139,7 @@ function M.start(lesson)
   state.window = window
   state.lesson = lesson
   state.won = false
+  state.hint_index = 0
   state.active = true
 
   if lesson.goal.type == "cursor" then
@@ -166,6 +196,7 @@ function M.stop()
   state.buffer = nil
   state.window = nil
   state.lesson = nil
+  state.hint_index = 0
   state.completion = nil
 end
 

@@ -10,4 +10,8 @@ return {
   },
   goal = { type = "cursor", target = { line = 4, col = 0 } },
   par = 3,
+  hints = {
+    "Press j to move down one line.",
+    "The target is on line 4 — three lines below where you start.",
+  },
 }

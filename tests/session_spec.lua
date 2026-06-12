@@ -2,10 +2,12 @@ describe("learn.session", function()
   local session = require("learn.session")
   local loader = require("learn.loader")
   local fixtures = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h") .. "/fixtures"
+  local original_notify = vim.notify
 
   after_each(function()
     session.stop()
     loader.set_user_tracks({})
+    vim.notify = original_notify
   end)
 
   local function counts()
@@ -277,5 +279,47 @@ describe("learn.session", function()
     vim.api.nvim_exec_autocmds("TextChanged", { buffer = play_buf })
 
     assert.is_true(session.is_won())
+  end)
+
+  it("reveals hints on demand without ending the session or counting", function()
+    local messages = {}
+    vim.notify = function(message)
+      table.insert(messages, message)
+    end
+
+    session.start({
+      title = "Hinted",
+      text = { "practice line" },
+      goal = { type = "cursor", target = { line = 1, col = 5 } },
+      hints = { "first hint", "second hint" },
+    })
+
+    local hint_code = vim.api.nvim_replace_termcodes("<F1>", true, false, true)
+    vim.api.nvim_feedkeys(hint_code, "x", false)
+    vim.api.nvim_feedkeys(hint_code, "x", false)
+
+    assert.is_true(session.is_active())
+    assert.equals(0, require("learn.counter").get())
+    assert.equals(2, #messages)
+    assert.is_not_nil(messages[1]:find("first hint", 1, true))
+    assert.is_not_nil(messages[2]:find("second hint", 1, true))
+  end)
+
+  it("reports when a lesson has no hints", function()
+    local messages = {}
+    vim.notify = function(message)
+      table.insert(messages, message)
+    end
+
+    session.start({
+      title = "No hints",
+      text = { "line" },
+      goal = { type = "cursor", target = { line = 1, col = 3 } },
+    })
+
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<F1>", true, false, true), "x", false)
+
+    assert.is_true(session.is_active())
+    assert.is_not_nil(messages[1]:find("no hints", 1, true))
   end)
 end)
