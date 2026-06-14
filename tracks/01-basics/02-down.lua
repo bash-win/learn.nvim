@@ -1,5 +1,6 @@
 return {
   title = "Move down with j",
+  description = "j moves the cursor down one line.",
   text = {
     "top",
     "down",

@@ -1,5 +1,6 @@
 return {
   title = "Search backward with ?",
+  description = "? then text and Enter searches backward.",
   text = {
     "the target is up here",
     "middle line",

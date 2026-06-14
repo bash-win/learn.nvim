@@ -5,6 +5,7 @@ local M = {}
 ---@field id string
 ---@field track string
 ---@field title string
+---@field description string|nil shown above the play area
 ---@field text string[]
 ---@field goal learn.Goal
 ---@field cursor learn.Pos|nil starting cursor position (default line 1, col 0)
@@ -33,6 +34,9 @@ function M.validate(candidate)
   end
   if type(candidate.title) ~= "string" or candidate.title == "" then
     return false, "lesson.title must be a non-empty string"
+  end
+  if candidate.description ~= nil and type(candidate.description) ~= "string" then
+    return false, "lesson.description must be a string when set"
   end
   if not is_string_list(candidate.text) or #candidate.text == 0 then
     return false, "lesson.text must be a non-empty list of strings"

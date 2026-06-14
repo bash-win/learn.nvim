@@ -1,5 +1,6 @@
 return {
   title = "First non-blank with ^",
+  description = "^ jumps to the first non-blank character.",
   text = { "    target after the spaces" },
   cursor = { line = 1, col = 20 },
   goal = { type = "cursor", target = { line = 1, col = 4 } },

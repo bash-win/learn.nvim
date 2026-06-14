@@ -1,5 +1,6 @@
 return {
   title = "Repeat an edit with .",
+  description = ". repeats your last change.",
   text = {
     "line one",
     "line two",

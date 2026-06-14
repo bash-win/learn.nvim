@@ -1,5 +1,6 @@
 return {
   title = "Move up with k",
+  description = "k moves the cursor up one line.",
   text = {
     "top",
     "GOAL: stop here",

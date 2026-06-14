@@ -1,5 +1,6 @@
 return {
   title = "Search forward with /",
+  description = "/ then text and Enter searches forward.",
   text = {
     "line one",
     "find the secret word",

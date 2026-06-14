@@ -1,5 +1,6 @@
 return {
   title = "Line start with 0",
+  description = "0 jumps to the first column of the line.",
   text = { "press 0 to jump to column zero" },
   cursor = { line = 1, col = 15 },
   goal = { type = "cursor", target = { line = 1, col = 0 } },

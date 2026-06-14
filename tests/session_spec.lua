@@ -123,13 +123,13 @@ describe("learn.session", function()
     session.start()
     local play_win = vim.api.nvim_get_current_win()
 
-    assert.equals("Keystrokes: 0", vim.wo[play_win].winbar)
+    assert.is_not_nil(vim.wo[play_win].winbar:find("Keystrokes: 0", 1, true))
     assert.is_true(counter.is_counting())
 
     type_keys("ll")
 
     assert.equals(2, counter.get())
-    assert.equals("Keystrokes: 2", vim.wo[play_win].winbar)
+    assert.is_not_nil(vim.wo[play_win].winbar:find("Keystrokes: 2", 1, true))
 
     session.stop()
     assert.is_false(counter.is_counting())
@@ -333,6 +333,19 @@ describe("learn.session", function()
     assert.is_not_nil(messages[1]:find("no hints", 1, true))
   end)
 
+  it("shows the lesson description in the winbar", function()
+    session.start({
+      title = "Desc",
+      description = "h moves the cursor left",
+      text = { "a", "b", "c", "d" },
+      goal = { type = "cursor", target = { line = 4, col = 0 } },
+      par = 3,
+    })
+
+    local play_win = vim.api.nvim_get_current_win()
+    assert.is_not_nil(vim.wo[play_win].winbar:find("h moves the cursor left", 1, true))
+  end)
+
   it("places the cursor at the lesson's start position", function()
     session.start({
       title = "Start lower",
@@ -344,5 +357,46 @@ describe("learn.session", function()
     local pos = vim.api.nvim_win_get_cursor(vim.api.nvim_get_current_win())
     assert.equals(4, pos[1])
     assert.equals(2, pos[2])
+  end)
+
+  it("skips to the next lesson with F2", function()
+    loader.set_user_tracks({ fixtures .. "/sample" })
+    local track = loader.load_track(fixtures .. "/sample")
+
+    session.start(track.lessons[1])
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<F2>", true, false, true), "x", false)
+
+    local lines = vim.api.nvim_buf_get_lines(vim.api.nvim_get_current_buf(), 0, -1, false)
+    assert.equals("gamma", lines[1])
+  end)
+
+  it("restarts the lesson with r on the end screen", function()
+    session.start({
+      title = "Restart me",
+      text = { "a", "b", "c", "d" },
+      goal = { type = "cursor", target = { line = 4, col = 0 } },
+      par = 3,
+    })
+    local play_win = vim.api.nvim_get_current_win()
+    local play_buf = vim.api.nvim_get_current_buf()
+
+    vim.api.nvim_win_set_cursor(play_win, { 4, 0 })
+    vim.api.nvim_exec_autocmds("CursorMoved", { buffer = play_buf })
+    assert.is_true(session.is_won())
+    wait_for_float()
+
+    local do_restart
+    for _, map in ipairs(vim.api.nvim_buf_get_keymap(vim.api.nvim_get_current_buf(), "n")) do
+      if map.lhs == "r" then
+        do_restart = map.callback
+      end
+    end
+    assert.is_function(do_restart)
+    do_restart()
+
+    assert.is_true(session.is_active())
+    assert.is_false(session.is_won())
+    local lines = vim.api.nvim_buf_get_lines(vim.api.nvim_get_current_buf(), 0, -1, false)
+    assert.equals("a", lines[1])
   end)
 end)

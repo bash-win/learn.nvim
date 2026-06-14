@@ -5,11 +5,19 @@ local target_ns = vim.api.nvim_create_namespace("learn.ui.target")
 
 vim.api.nvim_set_hl(0, "LearnTarget", { link = "IncSearch", default = true })
 
---- Show the keystroke count in the window's winbar.
+--- Render the winbar: the lesson description (if any) plus the keystroke count.
 ---@param window integer
+---@param description string|nil
 ---@param count integer
-function M.render_count(window, count)
-  vim.wo[window].winbar = string.format("Keystrokes: %d", count)
+function M.render_status(window, description, count)
+  local segments = {}
+  if description and description ~= "" then
+    -- % is special in 'winbar'; double it so the text shows literally.
+    table.insert(segments, (description:gsub("%%", "%%%%")))
+  end
+  table.insert(segments, string.format("Keystrokes: %d", count))
+  table.insert(segments, "F1 hint  F2 skip  q quit")
+  vim.wo[window].winbar = table.concat(segments, "   ·   ")
 end
 
 --- Show a lesson hint without stealing focus.
@@ -54,10 +62,10 @@ local function completion_lines(summary)
     "",
   }
   if summary.has_next then
-    table.insert(lines, "n: next lesson    q: quit")
+    table.insert(lines, "r: restart    n: next lesson    q: quit")
   else
     table.insert(lines, "Track complete!")
-    table.insert(lines, "q: quit")
+    table.insert(lines, "r: restart    q: quit")
   end
   return lines
 end

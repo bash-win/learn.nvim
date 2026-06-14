@@ -1,5 +1,6 @@
 return {
   title = "Delete a line with dd",
+  description = "dd deletes the whole current line.",
   text = {
     "keep this",
     "delete this line",

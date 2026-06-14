@@ -1,5 +1,6 @@
 return {
   title = "Matching pair with %",
+  description = "% jumps between a bracket and its match.",
   text = { "call(some, args) here" },
   cursor = { line = 1, col = 4 },
   goal = { type = "cursor", target = { line = 1, col = 15 } },

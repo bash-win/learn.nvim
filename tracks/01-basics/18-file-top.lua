@@ -1,5 +1,6 @@
 return {
   title = "Top of file with gg",
+  description = "gg jumps to the first line of the file.",
   text = {
     "top of the file",
     "two",

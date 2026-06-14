@@ -1,5 +1,6 @@
 return {
   title = "Move right with l",
+  description = "l moves the cursor one column to the right.",
   text = { "go to X now" },
   goal = { type = "cursor", target = { line = 1, col = 6 } },
   par = 6,

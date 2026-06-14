@@ -1,5 +1,6 @@
 return {
   title = "Change up to a character",
+  description = "ct then a character changes up to it and enters insert.",
   text = { "x = OLD;" },
   cursor = { line = 1, col = 4 },
   goal = { type = "content", expected = { "x = new;" } },

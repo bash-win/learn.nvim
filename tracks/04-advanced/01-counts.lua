@@ -1,5 +1,6 @@
 return {
   title = "Move with a count",
+  description = "A number before a motion repeats it, like 10j.",
   text = {
     "line 1",
     "line 2",

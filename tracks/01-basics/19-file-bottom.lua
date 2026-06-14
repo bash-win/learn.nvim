@@ -1,5 +1,6 @@
 return {
   title = "Bottom of file with G",
+  description = "G jumps to the last line of the file.",
   text = {
     "one",
     "two",
