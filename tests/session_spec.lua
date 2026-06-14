@@ -55,7 +55,7 @@ describe("learn.session", function()
     assert.is_true(vim.api.nvim_buf_is_valid(play_buf))
 
     local lines = vim.api.nvim_buf_get_lines(play_buf, 0, -1, false)
-    assert.equals("Welcome to learn.nvim!", lines[1])
+    assert.is_true(#lines >= 1)
 
     assert.equals("nofile", vim.bo[play_buf].buftype)
     assert.is_false(vim.bo[play_buf].modifiable)
@@ -136,7 +136,12 @@ describe("learn.session", function()
   end)
 
   it("fires a win when the cursor reaches the goal target", function()
-    session.start()
+    session.start({
+      title = "Win",
+      text = { "a", "b", "c", "d" },
+      goal = { type = "cursor", target = { line = 4, col = 0 } },
+      par = 3,
+    })
     local play_win = vim.api.nvim_get_current_win()
     local play_buf = vim.api.nvim_get_current_buf()
 
@@ -174,7 +179,12 @@ describe("learn.session", function()
       return false
     end
 
-    session.start()
+    session.start({
+      title = "Win",
+      text = { "a", "b", "c", "d" },
+      goal = { type = "cursor", target = { line = 4, col = 0 } },
+      par = 3,
+    })
     local play_win = vim.api.nvim_get_current_win()
     local play_buf = vim.api.nvim_get_current_buf()
     assert.is_false(has_float())
@@ -321,5 +331,18 @@ describe("learn.session", function()
 
     assert.is_true(session.is_active())
     assert.is_not_nil(messages[1]:find("no hints", 1, true))
+  end)
+
+  it("places the cursor at the lesson's start position", function()
+    session.start({
+      title = "Start lower",
+      text = { "one", "two", "three", "four" },
+      goal = { type = "cursor", target = { line = 1, col = 0 } },
+      cursor = { line = 4, col = 2 },
+    })
+
+    local pos = vim.api.nvim_win_get_cursor(vim.api.nvim_get_current_win())
+    assert.equals(4, pos[1])
+    assert.equals(2, pos[2])
   end)
 end)

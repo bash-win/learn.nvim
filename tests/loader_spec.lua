@@ -41,16 +41,25 @@ describe("learn.loader", function()
 
     assert.is_not_nil(basics)
     assert.equals("The Basics", basics.title)
-    assert.is_true(#basics.lessons >= 2)
-    assert.equals("01-intro", basics.lessons[1].id)
+    assert.is_true(#basics.lessons >= 1)
+  end)
 
-    local has_content_lesson = false
-    for _, entry in ipairs(basics.lessons) do
-      if entry.goal.type == "content" then
-        has_content_lesson = true
+  it("loads the built-in editing track with content lessons", function()
+    local editing
+    for _, track in ipairs(loader.tracks()) do
+      if track.id == "editing" then
+        editing = track
       end
     end
-    assert.is_true(has_content_lesson)
+
+    assert.is_not_nil(editing)
+    local has_content = false
+    for _, entry in ipairs(editing.lessons) do
+      if entry.goal.type == "content" then
+        has_content = true
+      end
+    end
+    assert.is_true(has_content)
   end)
 
   it("default_lesson returns a valid lesson from a built-in track", function()

@@ -7,6 +7,7 @@ local M = {}
 ---@field title string
 ---@field text string[]
 ---@field goal learn.Goal
+---@field cursor learn.Pos|nil starting cursor position (default line 1, col 0)
 ---@field par integer|nil
 ---@field hints string[]|nil
 
@@ -51,6 +52,12 @@ function M.validate(candidate)
     end
   else
     return false, "lesson.goal.type must be 'cursor' or 'content'"
+  end
+  if candidate.cursor ~= nil then
+    local cursor = candidate.cursor
+    if type(cursor) ~= "table" or type(cursor.line) ~= "number" or type(cursor.col) ~= "number" then
+      return false, "lesson.cursor must have numeric line and col when set"
+    end
   end
   if candidate.par ~= nil and (type(candidate.par) ~= "number" or candidate.par <= 0) then
     return false, "lesson.par must be a positive number when set"

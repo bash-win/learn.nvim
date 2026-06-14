@@ -135,6 +135,10 @@ function M.start(lesson)
     vim.api.nvim_buf_delete(empty_buffer, { force = true })
   end
 
+  if lesson.cursor ~= nil then
+    vim.api.nvim_win_set_cursor(window, { lesson.cursor.line, lesson.cursor.col })
+  end
+
   state.buffer = buffer
   state.window = window
   state.lesson = lesson
