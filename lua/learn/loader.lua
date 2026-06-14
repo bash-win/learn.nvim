@@ -29,7 +29,8 @@ end
 ---@return learn.Track
 function M.load_track(dir)
   dir = dir:gsub("/$", "")
-  local id = vim.fn.fnamemodify(dir, ":t")
+  local name = vim.fn.fnamemodify(dir, ":t")
+  local id = (name:gsub("^%d+%-", ""))
 
   ---@type learn.Track
   local track = { id = id, title = id, description = nil, lessons = {} }
