@@ -5,8 +5,10 @@ local M = {}
 ---@field id string
 ---@field track string
 ---@field title string
+---@field description string|nil shown above the play area
 ---@field text string[]
 ---@field goal learn.Goal
+---@field cursor learn.Pos|nil starting cursor position (default line 1, col 0)
 ---@field par integer|nil
 ---@field hints string[]|nil
 
@@ -33,6 +35,9 @@ function M.validate(candidate)
   if type(candidate.title) ~= "string" or candidate.title == "" then
     return false, "lesson.title must be a non-empty string"
   end
+  if candidate.description ~= nil and type(candidate.description) ~= "string" then
+    return false, "lesson.description must be a string when set"
+  end
   if not is_string_list(candidate.text) or #candidate.text == 0 then
     return false, "lesson.text must be a non-empty list of strings"
   end
@@ -51,6 +56,12 @@ function M.validate(candidate)
     end
   else
     return false, "lesson.goal.type must be 'cursor' or 'content'"
+  end
+  if candidate.cursor ~= nil then
+    local cursor = candidate.cursor
+    if type(cursor) ~= "table" or type(cursor.line) ~= "number" or type(cursor.col) ~= "number" then
+      return false, "lesson.cursor must have numeric line and col when set"
+    end
   end
   if candidate.par ~= nil and (type(candidate.par) ~= "number" or candidate.par <= 0) then
     return false, "lesson.par must be a positive number when set"

@@ -77,4 +77,28 @@ describe("learn.lesson", function()
     candidate.hints = { 1 }
     assert.is_false((lesson.validate(candidate)))
   end)
+
+  it("accepts an optional starting cursor", function()
+    local candidate = valid()
+    candidate.cursor = { line = 3, col = 2 }
+    assert.is_true((lesson.validate(candidate)))
+  end)
+
+  it("rejects a malformed starting cursor", function()
+    local candidate = valid()
+    candidate.cursor = { line = 3 }
+    assert.is_false((lesson.validate(candidate)))
+  end)
+
+  it("accepts an optional description", function()
+    local candidate = valid()
+    candidate.description = "h moves the cursor left"
+    assert.is_true((lesson.validate(candidate)))
+  end)
+
+  it("rejects a non-string description", function()
+    local candidate = valid()
+    candidate.description = 5
+    assert.is_false((lesson.validate(candidate)))
+  end)
 end)

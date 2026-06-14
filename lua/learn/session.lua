@@ -39,6 +39,14 @@ local function go_next()
   end
 end
 
+local function restart()
+  local lesson = state.lesson
+  M.stop()
+  if lesson ~= nil then
+    M.start(lesson)
+  end
+end
+
 local function handle_win()
   if not state.won or state.lesson == nil or state.completion ~= nil then
     return
@@ -59,6 +67,7 @@ local function handle_win()
   })
 
   vim.keymap.set("n", "q", M.stop, { buffer = state.completion.buffer, nowait = true })
+  vim.keymap.set("n", "r", restart, { buffer = state.completion.buffer, nowait = true })
   if has_next then
     vim.keymap.set("n", "n", go_next, { buffer = state.completion.buffer, nowait = true })
   end
@@ -67,7 +76,7 @@ end
 local function show_hint()
   counter.discount()
   if state.window ~= nil and vim.api.nvim_win_is_valid(state.window) then
-    ui.render_count(state.window, counter.get())
+    ui.render_status(state.window, state.lesson.description, counter.get())
   end
 
   local hints = state.lesson and state.lesson.hints
@@ -126,6 +135,12 @@ function M.start(lesson)
     show_hint,
     { buffer = buffer, nowait = true, desc = "learn.nvim: show a hint" }
   )
+  vim.keymap.set(
+    "n",
+    "<F2>",
+    go_next,
+    { buffer = buffer, nowait = true, desc = "learn.nvim: skip to the next lesson" }
+  )
 
   vim.cmd.tabnew()
   local window = vim.api.nvim_get_current_win()
@@ -133,6 +148,10 @@ function M.start(lesson)
   vim.api.nvim_win_set_buf(window, buffer)
   if vim.api.nvim_buf_is_valid(empty_buffer) then
     vim.api.nvim_buf_delete(empty_buffer, { force = true })
+  end
+
+  if lesson.cursor ~= nil then
+    vim.api.nvim_win_set_cursor(window, { lesson.cursor.line, lesson.cursor.col })
   end
 
   state.buffer = buffer
@@ -147,10 +166,10 @@ function M.start(lesson)
   end
 
   counter.reset()
-  ui.render_count(window, 0)
+  ui.render_status(window, lesson.description, 0)
   counter.start(function(keystrokes)
     if vim.api.nvim_win_is_valid(window) then
-      ui.render_count(window, keystrokes)
+      ui.render_status(window, lesson.description, keystrokes)
     end
   end)
 

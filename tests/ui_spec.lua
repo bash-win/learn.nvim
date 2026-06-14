@@ -5,14 +5,15 @@ describe("learn.ui", function()
     assert.is_table(ui)
   end)
 
-  it("render_count sets the window winbar to the count", function()
+  it("render_status shows the keystroke count, with an optional description", function()
     local win = vim.api.nvim_get_current_win()
 
-    ui.render_count(win, 7)
-    assert.equals("Keystrokes: 7", vim.wo[win].winbar)
+    ui.render_status(win, nil, 7)
+    assert.is_not_nil(vim.wo[win].winbar:find("Keystrokes: 7", 1, true))
 
-    ui.render_count(win, 42)
-    assert.equals("Keystrokes: 42", vim.wo[win].winbar)
+    ui.render_status(win, "h moves left", 42)
+    assert.is_not_nil(vim.wo[win].winbar:find("h moves left", 1, true))
+    assert.is_not_nil(vim.wo[win].winbar:find("Keystrokes: 42", 1, true))
   end)
 
   it("mark_target highlights the target cell", function()
