@@ -44,9 +44,9 @@ function M.load_track(dir)
     end
   end
 
-  for _, name in ipairs(vim.fn.readdir(dir)) do
-    if name:match("%.lua$") and name ~= "track.lua" then
-      local path = dir .. "/" .. name
+  for _, filename in ipairs(vim.fn.readdir(dir)) do
+    if filename:match("%.lua$") and filename ~= "track.lua" then
+      local path = dir .. "/" .. filename
       local candidate, load_err = load_file(path)
       if candidate == nil then
         vim.notify(
@@ -61,7 +61,7 @@ function M.load_track(dir)
             vim.log.levels.WARN
           )
         else
-          candidate.id = name:gsub("%.lua$", "")
+          candidate.id = filename:gsub("%.lua$", "")
           candidate.track = id
           table.insert(track.lessons, candidate)
         end
