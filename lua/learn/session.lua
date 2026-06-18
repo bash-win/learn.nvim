@@ -194,6 +194,16 @@ function M.start(lesson)
       end
     end,
   })
+
+  -- If the play buffer is closed by hand (:q, :tabclose) instead of via stop(),
+  -- tear the session down so it does not stay stuck active.
+  vim.api.nvim_create_autocmd("BufWipeout", {
+    group = augroup,
+    buffer = buffer,
+    callback = function()
+      vim.schedule(M.stop)
+    end,
+  })
 end
 
 --- Stop the active session and tear down its play area.

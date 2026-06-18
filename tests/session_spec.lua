@@ -359,6 +359,20 @@ describe("learn.session", function()
     assert.equals(2, pos[2])
   end)
 
+  it("stops the session when the play buffer is closed by hand", function()
+    session.start()
+    assert.is_true(session.is_active())
+    local play_win = vim.api.nvim_get_current_win()
+
+    vim.api.nvim_win_close(play_win, true)
+    vim.wait(200, function()
+      return not session.is_active()
+    end)
+
+    assert.is_false(session.is_active())
+    assert.is_false(require("learn.counter").is_counting())
+  end)
+
   it("skips to the next lesson with F2", function()
     loader.set_user_tracks({ fixtures .. "/sample" })
     local track = loader.load_track(fixtures .. "/sample")
